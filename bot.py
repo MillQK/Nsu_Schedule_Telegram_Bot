@@ -34,19 +34,29 @@ days_dict = {'понедельник': '1',
                 '5': '5',
                 '6': '6'}
 
+subjs_dict = {'первая': '0',
+              'вторая': '1',
+              'третья': '2',
+              'четвертая': '3',
+              'пятая': '4',
+              'шестая': '5',
+              'седьмая': '6',
+              '1': '0',
+              '2': '1',
+              '3': '2',
+              '4': '3',
+              '5': '4',
+              '6': '5',
+              '7': '6'}
+
+EMPTY_SUBJ = 'empty_pair'
+
 
 @bot.message_handler(commands=['sch'])
 def get_schedule(message):
     information = message.text.split()
 
-    if len(information) == 1 or not information[1] in sch:
-        send_sch_error_message(message.chat.id)
-        return
-
-    if len(information) > 2:
-        information[2] = information[2].lower()
-
-    if not information[2] in days_dict:
+    if not check_and_correct_request(information):
         send_sch_error_message(message.chat.id)
         return
 
@@ -54,9 +64,13 @@ def get_schedule(message):
     if len(information) == 3:
         day = sch[information[1]][information[2]]
         for i in range(0, 7):
-            answer += day[str(i)] + '\n\n'
+            answer += make_subject_message(day[str(i)]) + '\n\n'
     elif len(information) == 4:
-        answer = sch[information[1]][information[2]][information[3]]
+        answer = make_subject_message(sch[information[1]][information[2]][information[3]])
+    else:
+        send_sch_error_message(message.chat.id)
+        return
+
     print(answer)
     bot.send_message(message.chat.id, answer)
 
@@ -68,9 +82,46 @@ def send_sch_error_message(mid):
     bot.send_message(mid, error_massage)
 
 
+def check_and_correct_request(split_request):
+
+    if len(split_request) == 1 or not split_request[1] in sch:
+        return False
+
+    if len(split_request) > 2:
+        split_request[2] = split_request[2].lower()
+        if not split_request[2] in days_dict:
+            return False
+        else:
+            split_request[2] = days_dict[split_request[2]]
+
+    if len(split_request) > 3:
+        split_request[3] = split_request[3].lower()
+        if not split_request[3] in subjs_dict:
+            return False
+        else:
+            split_request[3] = subjs_dict[split_request[3]]
+
+    return True
+
+
+def make_subject_message(subj):
+
+    if len(subj) == 2:
+        return subj[0] + ':\n' + subj[1]
+    elif len(subj) == 3:
+        return '{0}:\nНечетная неделя:\n{1}\nЧетная неделя:\n{2}'.format(subj[0],
+                'Пустая пара' if subj[1] == EMPTY_SUBJ else subj[1],
+                'Пустая пара' if subj[2] == EMPTY_SUBJ else subj[2])
+
+
+
 @bot.message_handler(content_types=["text"])
 def repeat_all_messages(message):
     bot.send_message(message.chat.id, message.text)
+
+@bot.message_handler(content_types=["start"])
+def repeat_all_messages(message):
+    send_sch_error_message(message.chat.id)
 
 if __name__ == '__main__':
     with open('sch.txt', 'r') as inp:

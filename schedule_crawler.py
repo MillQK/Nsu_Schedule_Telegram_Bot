@@ -58,7 +58,7 @@ def get_schedule(links):
                 group_number = group_link.string
                 last_slash = link.rindex('/')
                 url = link[:last_slash+1] + group_link.get('href')
-                #url = 'http://www.nsu.ru/education/schedule/Html_GK/Groups/15136_1.htm'
+                # url = 'http://www.nsu.ru/education/schedule/Html_GK/Groups/16351_1.htm'
                 print(url)
                 group_source_code = requests.get(url)
                 group_text = group_source_code.text
@@ -110,17 +110,17 @@ def get_schedule(links):
                                     subj.append(strs)
                                     print(strs)
                                 elif shit1.text.rstrip() == '':
-                                    subj.append('')
+                                    subj.append([''])  # empty subject
                                 else:
-                                    subj.append(shit1.text)
+                                    subj.append(shit1.text)  # subject time
                             group_sch.append(subj)
                 print(group_sch)
                 group_dict = dict()  # all days with subjects
                 for i in range(1, 7):
                     daydict = dict()  # 1 day dict
                     for j in range(0, 7):
-                        str = group_sch[j][0] + ':\n' + group_sch[j][i]  # subject in day with time
-                        daydict[j] = str
+                        strg = [group_sch[j][0]] + group_sch[j][i]  # subject in day with time
+                        daydict[j] = strg
                     group_dict[i] = daydict
                 nsu_schedule[group_number] = group_dict
                 time.sleep(1)
@@ -131,29 +131,38 @@ def get_schedule(links):
 
 def parse_content(tagContent):
 
+    subjs = list()
+
     if len(tagContent.contents) == 5:
         if isinstance(tagContent.contents[0], bs4.element.NavigableString) and isinstance(tagContent.contents[2], bs4.element.NavigableString):
             strs = tagContent.contents[0] + '\n' + tagContent.contents[2]
         else:
             strs = tagContent.contents[0].text + '\n' + tagContent.contents[1] + '\n' + tagContent.contents[4].text
 
+        subjs.append(strs)
+
     elif len(tagContent.contents) == 6:
         strs = tagContent.contents[0] + '\n' + tagContent.contents[2] + '\n' + tagContent.contents[5].text
+        subjs.append(strs)
 
     elif len(tagContent.contents) == 4:
         strs = tagContent.contents[0].text
         if isinstance(tagContent.contents[1], bs4.element.NavigableString):
             strs += '\n' + tagContent.contents[1]
+        subjs.append(strs)
     elif len(tagContent.contents) == 1:
-        strs = parse_content(tagContent.contents[0])
+        subjs = parse_content(tagContent.contents[0])
     else:
         pair = tagContent.find_all('td')
         if pair[0].text.strip() != '' and pair[1].text.strip() != '':
-            strs = parse_content(pair[0]) + '\n----------\n' + parse_content(pair[1])
-
+            #strs = parse_content(pair[0]) + '\n----------\n' + parse_content(pair[1])
+            subjs += parse_content(pair[0])
+            subjs += parse_content(pair[1])
         elif pair[0].text.strip() == '':
             content = pair[1]
-            strs = '//////////\n----------\n' + parse_content(content)
+            #strs = '//////////\n----------\n' + parse_content(content)
+            subjs.append('empty_pair')
+            subjs += parse_content(content)
         #     content = pair[1].hr
         #     if content is None:
         #         content = pair[1].contents
@@ -165,7 +174,9 @@ def parse_content(tagContent):
         #         strs = '//////////\n----------\n' + content[0] + '\n' + content[2] + '\n' + content[5].text
         else:
             content = pair[0]
-            strs = parse_content(content) + '\n----------\n//////////'
+            # strs = parse_content(content) + '\n----------\n//////////'
+            subjs += parse_content(content)
+            subjs.append('empty_pair')
             # content = pair[0].hr
             # if content is None:
             #     content = pair[0].contents
@@ -176,7 +187,7 @@ def parse_content(tagContent):
             # else:
             #     strs = content[0] + '\n' + content[2] + '\n' + content[5].text + '\n----------\n//////////'
 
-    return strs
+    return subjs
 
 
 def has_digit(string):
