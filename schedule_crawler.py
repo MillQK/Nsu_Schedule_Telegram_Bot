@@ -20,7 +20,7 @@ def get_gk_links():
 
 
 def get_lk_links():
-    url = 'http://www.nsu.ru/education/schedule/Html_LK/'
+    url = 'http://www.nsu.ru/education/schedule/Html_LK/schedule.htm'
     source_code = requests.get(url)
     text = source_code.text
     soup = BeautifulSoup(text, "html.parser")
@@ -28,21 +28,6 @@ def get_lk_links():
     for link in soup.find_all('li'):
         print('http://www.nsu.ru/education/schedule/Html_LK/' + link.a.get('href'))
         links.append('http://www.nsu.ru/education/schedule/Html_LK/' + link.a.get('href'))
-    return links
-
-
-def get_lk1_links():
-
-    url = 'http://www.nsu.ru/education/schedule/Html_LK1/'
-    source_code = requests.get(url)
-    text = source_code.text
-    soup = BeautifulSoup(text, "html.parser")
-    links = []
-
-    for link in soup.find_all('li'):
-        print('http://www.nsu.ru/education/schedule/Html_LK1/' + link.a.get('href'))
-        links.append('http://www.nsu.ru/education/schedule/Html_LK1/' + link.a.get('href'))
-
     return links
 
 
@@ -193,7 +178,7 @@ def parse_content(tagContent):
 def has_digit(string):
     return any(char.isdigit() for char in string)
 
-links = get_gk_links() + get_lk_links() + get_lk1_links()
+links = get_gk_links() + get_lk_links()
 print(links)
 get_schedule(links)
 
