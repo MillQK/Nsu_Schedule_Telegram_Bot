@@ -10,3 +10,7 @@ config.py
 groups_storage.db
 
 sch.txt
+
+nsuSchTelBot_pkey.pem.txt
+
+nsuSchTelBot_cert.pem.txt
