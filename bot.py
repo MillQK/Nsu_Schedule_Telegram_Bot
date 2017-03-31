@@ -11,6 +11,10 @@ bot = telebot.TeleBot(config.token)
 groups_storage = pickledb.load('groups_storage.db', False)
 
 
+def is_command(text):
+    return text[0] == '/'
+
+
 @bot.message_handler(commands=['fcoin'])
 def flip_coin(message):
     coin = randint(0, 1)
@@ -74,7 +78,9 @@ def get_schedule(message):
         return
 
     answer = ''
-    if len(information) == 3:
+    if len(information) == 2:
+        dialog_group(message.chat.id, information[1])
+    elif len(information) == 3:
         day = sch[information[1]][information[2]]
         for i in range(0, 7):
             answer += make_subject_message(day[str(i)]) + '\n\n'
@@ -84,7 +90,7 @@ def get_schedule(message):
         send_sch_error_message(message.chat.id)
         return
 
-    print(answer)
+    # print(answer)
     bot.send_message(message.chat.id, answer)
 
 
@@ -93,14 +99,16 @@ chat_history = dict()
 
 @bot.message_handler(commands=['sch'])
 def schedule_custom_keyboard(message):
-    sent = bot.send_message(message.chat.id, 'Введите вашу группу.')
+    sent = bot.send_message(message.chat.id, 'Введите вашу группу.', reply_markup=types.ReplyKeyboardHide())
     bot.register_next_step_handler(sent, dialog_group_check)
 
 
 def dialog_group_check(message):
     group_num = message.text
+    if is_command(message.text):
+        return
     if group_num not in sch:
-        bot.send_message(message.chat.id, 'Нет такой группы. Попробуйте еще раз.')
+        bot.send_message(message.chat.id, 'Нет такой группы. Попробуйте еще раз.', reply_markup=types.ReplyKeyboardHide())
         return
     dialog_group(message.chat.id, group_num)
 
@@ -115,7 +123,10 @@ def dialog_group(mchat_id, group):
     sent = bot.send_message(mchat_id, 'Выберете день недели', reply_markup=markup)
     bot.register_next_step_handler(sent, dialog_weekday)
 
+
 def dialog_weekday(message):
+    if is_command(message.text):
+        return
     weekday = message.text.lower()
     if weekday not in days_dict:
         bot.send_message(message.chat.id, 'Нет такого дня недели. Попробуйте еще раз.',
@@ -133,6 +144,8 @@ def dialog_weekday(message):
 
 
 def dialog_answer(message):
+    if is_command(message.text):
+        return
     subj = message.text.lower()
     if subj not in subjs_dict and subj != 'все пары':
         bot.send_message(message.chat.id, 'Нет такой пары. Попробуйте еще раз.', reply_markup=types.ReplyKeyboardHide())
@@ -154,12 +167,12 @@ def send_sch_error_message(mid):
                     '(опционально)> <номер пары (цифрой, только если есть день недели)(опционально)>' \
                     '\nНапример: /sch 16202 пт 3\n\n' \
                     'Либо можете просто написать /sch и дальше взаимодействовать с ботом.'
-    bot.send_message(mid, error_massage)
+    bot.send_message(mid, error_massage, reply_markup=types.ReplyKeyboardHide())
 
 
 def check_and_correct_request(split_request):
 
-    if len(split_request) == 1 or not split_request[1] in sch:
+    if len(split_request) == 1 or split_request[1] not in sch:
         return False
 
     if len(split_request) > 2:
@@ -216,6 +229,8 @@ def set_group_in_msg(message):
     if message.text == '/setgroup':
         send = bot.send_message(message.chat.id, 'Введите вашу группу.')
         bot.register_next_step_handler(send, set_group_in_msg)
+    elif is_command(message.text):
+        return
     else:
         group = message.text
         if group not in sch:
