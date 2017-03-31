@@ -20,7 +20,7 @@ WEBHOOK_LISTEN = '0.0.0.0'  # На некоторых серверах прид�
 WEBHOOK_SSL_CERT = './nsuSchTelBot_cert.pem'  # Путь к сертификату
 WEBHOOK_SSL_PRIV = './nsuSchTelBot_pkey.pem'  # Путь к приватному ключу
 
-WEBHOOK_URL_BASE = "https://%s:%s" % (WEBHOOK_HOST, WEBHOOK_PORT)
+WEBHOOK_URL_BASE = "https://%s:%s" % ('MilQ.pythonanywhere.com', WEBHOOK_PORT)
 WEBHOOK_URL_PATH = "/%s/" % (config.token)
 
 context = SSL.Context(SSL.SSLv23_METHOD)
@@ -316,4 +316,3 @@ if __name__ == '__main__':
     # bot.polling(none_stop=True)
     app.run(host=WEBHOOK_HOST, port=WEBHOOK_PORT,
         debug=False, ssl_context=context)
-    
