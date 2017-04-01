@@ -253,10 +253,9 @@ def make_day_subjects_message(day):
 
 
 def send_week_schedule(mchat_id, group_sch):
-
     for weekday in weekdays_list:
         day_subjects = group_sch[days_dict[weekday.lower()]]
-        msg = '*{0)*\n\n{1}'.format(weekday, make_day_subjects_message(day_subjects))
+        msg = '*{0}*\n\n{1}'.format(weekday, make_day_subjects_message(day_subjects))
         bot.send_message(mchat_id, msg, reply_markup=types.ReplyKeyboardHide(),
                          parse_mode='Markdown')
 
