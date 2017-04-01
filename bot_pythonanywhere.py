@@ -28,6 +28,7 @@ app = Flask(__name__)
 @app.route('/{}'.format(config.token))
 def index():
     update = request.json
+    print(update)
     if update:
         bot.process_new_updates([update])
         return 'Ok'
