@@ -10,18 +10,13 @@ from OpenSSL import SSL
 
 
 bot = telebot.TeleBot(config.token, threaded=False)
+logger = telebot.logger.setLevel('DEBUG')
 groups_storage = pickledb.load('groups_storage.db', False)
-
-
-WEBHOOK_HOST = '0.0.0.0'
-WEBHOOK_PORT = 8443  # 443, 80, 88 или 8443 (порт должен быть открыт!)
-WEBHOOK_LISTEN = '0.0.0.0'  # На некоторых серверах придется указывать такой же IP, что и выше
 
 WEBHOOK_SSL_CERT = './nsuSchTelBot_cert.pem'  # Путь к сертификату
 WEBHOOK_SSL_PRIV = './nsuSchTelBot_pkey.pem'  # Путь к приватному ключу
 
-WEBHOOK_URL_BASE = "https://%s" % 'MilQ.pythonanywhere.com'
-WEBHOOK_URL_PATH = "/%s/" % config.token
+WEBHOOK_URL = "https://MilQ.pythonanywhere.com/{}".format(config.token)
 
 context = SSL.Context(SSL.SSLv23_METHOD)
 context.use_privatekey_file(WEBHOOK_SSL_PRIV)
@@ -307,7 +302,9 @@ if __name__ == '__main__':
     bot.remove_webhook()
 
     # Ставим заново вебхук
-    bot.set_webhook(url=WEBHOOK_URL_BASE + WEBHOOK_URL_PATH,
+    bot.set_webhook(url=WEBHOOK_URL,
                     certificate=open(WEBHOOK_SSL_CERT, 'r'))
+
+    print('Webhook set, everything is ready.')
     # bot.polling(none_stop=True)
     # app.run(host=WEBHOOK_HOST, ssl_context=context)
