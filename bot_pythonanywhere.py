@@ -308,3 +308,5 @@ if __name__ == '__main__':
     print('Webhook set, everything is ready.')
     # bot.polling(none_stop=True)
     # app.run(host=WEBHOOK_HOST, ssl_context=context)
+
+print('Not inside main, woohoo')
