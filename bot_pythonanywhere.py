@@ -32,7 +32,7 @@ def index():
     if update:
         print(json.dumps(update), type(update))
         bot.process_new_updates([update])
-        # return '', 200
+        return ''
     else:
         abort(403)
 
