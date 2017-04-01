@@ -27,6 +27,7 @@ app = Flask(__name__)
 
 @app.route('/{}'.format(config.token))
 def index():
+    print('New connection')
     update = request.json
     print(update)
     if update:
