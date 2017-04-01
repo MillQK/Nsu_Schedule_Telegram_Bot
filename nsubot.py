@@ -221,7 +221,7 @@ def make_day_subjects_message(day):
 
     message = ''
     for num_subj in subjects_list:
-        ans = make_subject_message(num_subj)
+        ans = make_subject_message(day[num_subj])
         message += '{0}\n\n'.format(ans) if ans != '' else ''
 
     return message
