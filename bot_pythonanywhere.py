@@ -295,18 +295,27 @@ def dialog_mysch(message):
 def repeat_all_messages(message):
     send_sch_error_message(message.chat.id)
 
-if __name__ == '__main__':
-    with open('sch.txt', 'r') as inp:
-        sch = json.load(inp)
+# if __name__ == '__main__':
+#     with open('sch.txt', 'r') as inp:
+#         sch = json.load(inp)
+#
+#     bot.remove_webhook()
+#
+#     # Ставим заново вебхук
+#     bot.set_webhook(url=WEBHOOK_URL,
+#                     certificate=open(WEBHOOK_SSL_CERT, 'r'))
+#
+#     print('Webhook set, everything is ready.')
+#     # bot.polling(none_stop=True)
+#     # app.run(host=WEBHOOK_HOST, ssl_context=context)
 
-    bot.remove_webhook()
+with open('sch.txt', 'r') as inp:
+    sch = json.load(inp)
 
-    # Ставим заново вебхук
-    bot.set_webhook(url=WEBHOOK_URL,
-                    certificate=open(WEBHOOK_SSL_CERT, 'r'))
+bot.remove_webhook()
 
-    print('Webhook set, everything is ready.')
-    # bot.polling(none_stop=True)
-    # app.run(host=WEBHOOK_HOST, ssl_context=context)
+# Ставим заново вебхук
+bot.set_webhook(url=WEBHOOK_URL,
+                certificate=open(WEBHOOK_SSL_CERT, 'r'))
 
 print('Not inside main, woohoo')
