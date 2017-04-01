@@ -302,9 +302,9 @@ if __name__ == '__main__':
     with open('sch.txt', 'r') as inp:
         sch = json.load(inp)
 
-    jsn = json.loads('''"{'update_id': 624382614, 'message': {'from': {'id': 249750777, 'last_name': 'Nikolenko', 'first_name': 'Nikita'}, 'chat': {'type': 'private', 'id': 249750777, 'last_name': 'Nikolenko', 'first_name': 'Nikita'}, 'message_id': 416, 'entities': [{'length': 9, 'type': 'bot_command', 'offset': 0}], 'date': 1491020569, 'text': '/setgroup'}}"''')
+    jsn = json.loads('{"message": {"entities": [{"type": "bot_command", "offset": 0, "length": 6}], "date": 1491019666, "from": {"id": 249750777, "last_name": "Nikolenko", "first_name": "Nikita"}, "chat": {"type": "private", "id": 249750777, "last_name": "Nikolenko", "first_name": "Nikita"}, "text": "/mysch", "message_id": 413}, "update_id": 624382611}')
 
-    bot.process_new_updates([telebot.types.Update.de_json(json)])
+    bot.process_new_updates([telebot.types.Update.de_json(jsn)])
 
     # bot.remove_webhook()
     #
