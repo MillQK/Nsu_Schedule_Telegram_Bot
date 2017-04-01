@@ -9,7 +9,7 @@ from flask import Flask, request, abort
 from OpenSSL import SSL
 
 
-bot = telebot.TeleBot(config.token)
+bot = telebot.TeleBot(config.token, threaded=False)
 groups_storage = pickledb.load('groups_storage.db', False)
 
 
@@ -20,8 +20,8 @@ WEBHOOK_LISTEN = '0.0.0.0'  # На некоторых серверах прид�
 WEBHOOK_SSL_CERT = './nsuSchTelBot_cert.pem'  # Путь к сертификату
 WEBHOOK_SSL_PRIV = './nsuSchTelBot_pkey.pem'  # Путь к приватному ключу
 
-WEBHOOK_URL_BASE = "https://%s:%s" % ('MilQ.pythonanywhere.com', WEBHOOK_PORT)
-WEBHOOK_URL_PATH = "/%s/" % (config.token)
+WEBHOOK_URL_BASE = "https://%s" % 'MilQ.pythonanywhere.com'
+WEBHOOK_URL_PATH = "/%s/" % config.token
 
 context = SSL.Context(SSL.SSLv23_METHOD)
 context.use_privatekey_file(WEBHOOK_SSL_PRIV)
@@ -29,7 +29,8 @@ context.use_certificate_file(WEBHOOK_SSL_CERT)
 
 app = Flask(__name__)
 
-@app.route('/')
+
+@app.route('/{}'.format(config.token))
 def index():
     update = request.json
     if update:
@@ -309,4 +310,4 @@ if __name__ == '__main__':
     bot.set_webhook(url=WEBHOOK_URL_BASE + WEBHOOK_URL_PATH,
                     certificate=open(WEBHOOK_SSL_CERT, 'r'))
     # bot.polling(none_stop=True)
-    app.run(host=WEBHOOK_HOST, ssl_context=context)
+    # app.run(host=WEBHOOK_HOST, ssl_context=context)
