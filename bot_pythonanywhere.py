@@ -32,7 +32,7 @@ def index():
     print(update)
     if update:
         bot.process_new_updates([update])
-        return 200
+        return '', 200
     else:
         abort(403)
 
