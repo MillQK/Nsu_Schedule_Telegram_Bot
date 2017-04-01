@@ -32,7 +32,7 @@ def index():
     print(update)
     if update:
         bot.process_new_updates([update])
-        return 'Ok'
+        return 200
     else:
         abort(403)
 
@@ -285,6 +285,7 @@ def save_data_in_storage(storage_key, data_key, data_value):
 
 @bot.message_handler(commands=["mysch"])
 def dialog_mysch(message):
+    print('/mysch handler')
     chat_id_str = str(message.chat.id)
     if chat_id_str not in groups_storage.getall():
         bot.send_message(message.chat.id, 'У вас неустановленна группа. Воспользуйтесь коммандой /setgroup.')
