@@ -5,6 +5,7 @@ from telebot import types
 from random import randint
 import json
 import pickledb
+import datetime
 
 
 bot = telebot.TeleBot(config.token, threaded=config.bot_threaded)
@@ -68,6 +69,7 @@ subjs_dict = {'первая': '0',
               'седьмая (20:00)': '6'}
 
 subjects_list = ['0', '1', '2', '3', '4', '5', '6']
+weekdays_list = ['Понедельник', 'Вторник', 'Срада', 'Четверг', 'Пятница', 'Суббота']
 
 EMPTY_SUBJ = 'empty_pair'
 GROUP_NAME = 'group_name'
@@ -106,7 +108,7 @@ chat_history = dict()
 
 @bot.message_handler(commands=['sch'])
 def schedule_custom_keyboard(message):
-    sent = bot.send_message(message.chat.id, 'Введите вашу группу.', reply_markup=types.ReplyKeyboardHide())
+    sent = bot.send_message(message.chat.id, 'Введите номер группы.', reply_markup=types.ReplyKeyboardHide())
     bot.register_next_step_handler(sent, dialog_group_check)
 
 
@@ -124,10 +126,11 @@ def dialog_group_check(message):
 def dialog_group(mchat_id, group):
     chat_history[mchat_id] = sch[group]
     markup = types.ReplyKeyboardMarkup()
+    markup.row('Сегодня', 'Завтра')
     markup.row('Понедельник', 'Вторник')
     markup.row('Среда', 'Четверг')
     markup.row('Пятница', 'Суббота')
-    # markup.row('Все дни')
+    markup.row('Вся неделя')
     sent = bot.send_message(mchat_id, 'Выберете день недели', reply_markup=markup)
     bot.register_next_step_handler(sent, dialog_weekday)
 
@@ -136,6 +139,24 @@ def dialog_weekday(message):
     if is_command(message.text):
         return
     weekday = message.text.lower()
+
+    if weekday == 'вся неделя':
+        send_week_schedule(message.chat.id, chat_history[message.chat.id])
+        return
+
+    if weekday == 'сегодня' or weekday == 'завтра':
+        if weekday == 'сегодня':
+            weekday = today_weekday()
+        elif weekday == 'завтра':
+            weekday = tomorrow_weekday()
+
+        if weekday == 0:
+            bot.send_message(message.chat.id, 'В воскресенье нет занятий.',
+                             reply_markup=types.ReplyKeyboardHide())
+            return
+
+        weekday = str(weekday)
+
     if weekday not in days_dict:
         bot.send_message(message.chat.id, 'Нет такого дня недели. Попробуйте еще раз.',
                          reply_markup=types.ReplyKeyboardHide())
@@ -231,6 +252,15 @@ def make_day_subjects_message(day):
     return message
 
 
+def send_week_schedule(mchat_id, group_sch):
+
+    for weekday in weekdays_list:
+        day_subjects = group_sch[days_dict[weekday.lower()]]
+        msg = '*{0)*\n\n{1}'.format(weekday, make_day_subjects_message(day_subjects))
+        bot.send_message(mchat_id, msg, reply_markup=types.ReplyKeyboardHide(),
+                         parse_mode='Markdown')
+
+
 def is_day_empty(day):
     for num_subj in subjects_list:
         cur_subj = day[num_subj]
@@ -240,6 +270,18 @@ def is_day_empty(day):
             return False
 
     return True
+
+
+def today_weekday():
+    utc = datetime.datetime.utcnow()
+    delta_nsk_tz = datetime.timedelta(hours=7)
+    nsk_time = utc + delta_nsk_tz
+    # In python monday is 0, tuesday is 1 and etc. In bot monday is 1 and sunday is 0.
+    return (nsk_time.weekday() + 1) % 7
+
+
+def tomorrow_weekday():
+    return (today_weekday() + 1) % 7
 
 
 @bot.message_handler(func=lambda msg: len(msg.text.split()) > 1, commands=['setgroup'])
@@ -267,7 +309,7 @@ def set_group_in_msg(message):
         return
 
     if message.text == '/setgroup':
-        send = bot.send_message(message.chat.id, 'Введите вашу группу.')
+        send = bot.send_message(message.chat.id, 'Введите номер вашей группы.')
         bot.register_next_step_handler(send, set_group_in_msg)
     elif is_command(message.text):
         return
