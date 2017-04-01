@@ -315,7 +315,7 @@ with open('sch.txt', 'r') as inp:
 bot.remove_webhook()
 
 # Ставим заново вебхук
-bot.set_webhook(url=WEBHOOK_URL,
-                certificate=open(WEBHOOK_SSL_CERT, 'r'))
+bot.set_webhook(url=WEBHOOK_URL)
+                # certificate=open(WEBHOOK_SSL_CERT, 'r'))
 
 print('Not inside main, woohoo')
