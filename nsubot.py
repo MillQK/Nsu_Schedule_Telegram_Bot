@@ -67,8 +67,12 @@ subjs_dict = {'первая': '0',
               'шестая (18:10)': '5',
               'седьмая (20:00)': '6'}
 
+subjects_list = ['0', '1', '2', '3', '4', '5', '6']
+
 EMPTY_SUBJ = 'empty_pair'
 GROUP_NAME = 'group_name'
+
+EMPTY_DAY_MESSAGE = 'В этот день пар нет.'
 
 
 @bot.message_handler(func=lambda msg: len(msg.text.split()) > 1, commands=['sch'])
@@ -136,6 +140,12 @@ def dialog_weekday(message):
         return
 
     chat_history[message.chat.id] = chat_history[message.chat.id][days_dict[weekday]]
+
+    if is_day_empty(chat_history[message.chat.id]):
+        bot.send_message(message.chat.id, EMPTY_DAY_MESSAGE,
+                         reply_markup=types.ReplyKeyboardHide())
+        return
+
     markup = types.ReplyKeyboardMarkup()
     markup.row('Первая (9:00)', 'Вторая (10:50)')
     markup.row('Третья (12:40)', 'Четвертая (14:30)')
@@ -155,9 +165,7 @@ def dialog_answer(message):
 
     day = chat_history[message.chat.id]
     if subj == 'все пары':
-        answer = ''
-        for i in range(0, 7):
-            answer += make_subject_message(day[str(i)]) + '\n\n'
+        answer = make_day_subjects_message(day)
     else:
         answer = make_subject_message(day[subjs_dict[subj]])
 
@@ -196,12 +204,38 @@ def check_and_correct_request(split_request):
 
 def make_subject_message(subj):
 
-    if len(subj) == 2:
-        return subj[0] + ':\n' + subj[1]
+    if len(subj) == 2 and subj[1] != '':
+        return '*{0}*:\n{1}'.format(subj[0], subj[1])
     elif len(subj) == 3:
-        return '{0}:\nНечетная неделя:\n{1}\nЧетная неделя:\n{2}'.format(subj[0],
+        return '*{0}*:\nНечетная неделя:\n{1}\nЧетная неделя:\n{2}'.format(subj[0],
                 'Пустая пара' if subj[1] == EMPTY_SUBJ else subj[1],
                 'Пустая пара' if subj[2] == EMPTY_SUBJ else subj[2])
+    else:
+        return ''
+
+
+def make_day_subjects_message(day):
+
+    if is_day_empty(day):
+        return EMPTY_DAY_MESSAGE
+
+    message = ''
+    for num_subj in subjects_list:
+        ans = make_subject_message(num_subj)
+        message += '{0}\n\n'.format(ans) if ans != '' else ''
+
+    return message
+
+
+def is_day_empty(day):
+    for num_subj in subjects_list:
+        cur_subj = day[num_subj]
+        if len(cur_subj) == 2 and cur_subj[1] != '':
+            return False
+        elif len(cur_subj) == 3:
+            return False
+
+    return True
 
 
 @bot.message_handler(func=lambda msg: len(msg.text.split()) > 1, commands=['setgroup'])
