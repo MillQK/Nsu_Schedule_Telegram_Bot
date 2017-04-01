@@ -73,6 +73,7 @@ EMPTY_SUBJ = 'empty_pair'
 GROUP_NAME = 'group_name'
 
 EMPTY_DAY_MESSAGE = 'В этот день пар нет.'
+EMPTY_SUBJ_MESSAGE = 'Пустая пара.'
 
 
 @bot.message_handler(func=lambda msg: len(msg.text.split()) > 1, commands=['sch'])
@@ -114,7 +115,8 @@ def dialog_group_check(message):
     if is_command(message.text):
         return
     if group_num not in sch:
-        bot.send_message(message.chat.id, 'Нет такой группы. Попробуйте еще раз.', reply_markup=types.ReplyKeyboardHide())
+        bot.send_message(message.chat.id, 'Нет такой группы. Попробуйте еще раз.',
+                         reply_markup=types.ReplyKeyboardHide())
         return
     dialog_group(message.chat.id, group_num)
 
@@ -166,10 +168,12 @@ def dialog_answer(message):
     day = chat_history[message.chat.id]
     if subj == 'все пары':
         answer = make_day_subjects_message(day)
+    elif day[subjs_dict[subj]][1] == '':  # Пустая пара
+        answer = '{0}:{1}'.format(day[subjs_dict[subj]][0], EMPTY_DAY_MESSAGE)
     else:
         answer = make_subject_message(day[subjs_dict[subj]])
 
-    bot.send_message(message.chat.id, answer, reply_markup=types.ReplyKeyboardHide())
+    bot.send_message(message.chat.id, answer, reply_markup=types.ReplyKeyboardHide(), parse_mode='Markdown')
 
 
 def send_sch_error_message(mid):
@@ -207,7 +211,7 @@ def make_subject_message(subj):
     if len(subj) == 2 and subj[1] != '':
         return '*{0}*:\n{1}'.format(subj[0], subj[1])
     elif len(subj) == 3:
-        return '*{0}*:\nНечетная неделя:\n{1}\nЧетная неделя:\n{2}'.format(subj[0],
+        return '*{0}*:\n*Нечетная неделя*:\n{1}\n*Четная неделя*:\n{2}'.format(subj[0],
                 'Пустая пара' if subj[1] == EMPTY_SUBJ else subj[1],
                 'Пустая пара' if subj[2] == EMPTY_SUBJ else subj[2])
     else:
