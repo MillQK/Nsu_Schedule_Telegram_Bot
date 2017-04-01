@@ -302,7 +302,7 @@ if __name__ == '__main__':
     with open('sch.txt', 'r') as inp:
         sch = json.load(inp)
 
-    json = '''"{'message': {'date': 1491021241, 'entities': [{'type': 'bot_command', 'offset': 0, 'length': 4}], 'from': {'last_name': 'Nikolenko', 'id': 249750777, 'first_name': 'Nikita'}, 'chat': {'last_name': 'Nikolenko', 'type': 'private', 'id': 249750777, 'first_name': 'Nikita'}, 'text': '/sch', 'message_id': 418}, 'update_id': 624382616}"'''
+    jsn = json.loads('''"{'update_id': 624382614, 'message': {'from': {'id': 249750777, 'last_name': 'Nikolenko', 'first_name': 'Nikita'}, 'chat': {'type': 'private', 'id': 249750777, 'last_name': 'Nikolenko', 'first_name': 'Nikita'}, 'message_id': 416, 'entities': [{'length': 9, 'type': 'bot_command', 'offset': 0}], 'date': 1491020569, 'text': '/setgroup'}}"''')
 
     bot.process_new_updates([telebot.types.Update.de_json(json)])
 

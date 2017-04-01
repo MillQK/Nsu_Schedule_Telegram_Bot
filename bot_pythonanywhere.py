@@ -30,7 +30,7 @@ def index():
     print('New connection')
     update = request.json
     if update:
-        print(update, type(update))
+        print(json.dumps(update), type(update))
         bot.process_new_updates([update])
         return '', 200
     else:
