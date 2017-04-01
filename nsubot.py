@@ -169,7 +169,7 @@ def dialog_answer(message):
     if subj == 'все пары':
         answer = make_day_subjects_message(day)
     elif day[subjs_dict[subj]][1] == '':  # Пустая пара
-        answer = '{0}:{1}'.format(day[subjs_dict[subj]][0], EMPTY_DAY_MESSAGE)
+        answer = '*{0}*: {1}'.format(day[subjs_dict[subj]][0], EMPTY_SUBJ_MESSAGE)
     else:
         answer = make_subject_message(day[subjs_dict[subj]])
 
