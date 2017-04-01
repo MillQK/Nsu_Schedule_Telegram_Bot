@@ -29,8 +29,8 @@ app = Flask(__name__)
 def index():
     print('New connection')
     update = request.json
-    print(update)
     if update:
+        print(update, type(update))
         bot.process_new_updates([update])
         return '', 200
     else:

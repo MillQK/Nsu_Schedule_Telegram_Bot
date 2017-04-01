@@ -6,7 +6,6 @@ from random import randint
 import json
 import pickledb
 from flask import Flask, request, abort
-from OpenSSL import SSL
 
 
 bot = telebot.TeleBot(config.token)
@@ -22,10 +21,10 @@ WEBHOOK_SSL_PRIV = './nsuSchTelBot_pkey.pem'  # Путь к приватному
 
 WEBHOOK_URL_BASE = "https://%s:%s" % ('MilQ.pythonanywhere.com', WEBHOOK_PORT)
 WEBHOOK_URL_PATH = "/%s/" % (config.token)
-
-context = SSL.Context(SSL.SSLv23_METHOD)
-context.use_privatekey_file(WEBHOOK_SSL_PRIV)
-context.use_certificate_file(WEBHOOK_SSL_CERT)
+#
+# context = SSL.Context(SSL.SSLv23_METHOD)
+# context.use_privatekey_file(WEBHOOK_SSL_PRIV)
+# context.use_certificate_file(WEBHOOK_SSL_CERT)
 
 app = Flask(__name__)
 
@@ -303,10 +302,14 @@ if __name__ == '__main__':
     with open('sch.txt', 'r') as inp:
         sch = json.load(inp)
 
-    bot.remove_webhook()
+    json = '''"{'message': {'date': 1491021241, 'entities': [{'type': 'bot_command', 'offset': 0, 'length': 4}], 'from': {'last_name': 'Nikolenko', 'id': 249750777, 'first_name': 'Nikita'}, 'chat': {'last_name': 'Nikolenko', 'type': 'private', 'id': 249750777, 'first_name': 'Nikita'}, 'text': '/sch', 'message_id': 418}, 'update_id': 624382616}"'''
 
-    # Ставим заново вебхук
-    bot.set_webhook(url=WEBHOOK_URL_BASE + WEBHOOK_URL_PATH,
-                    certificate=open(WEBHOOK_SSL_CERT, 'r'))
-    # bot.polling(none_stop=True)
-    app.run(host=WEBHOOK_HOST, ssl_context=context)
+    bot.process_new_updates([telebot.types.Update.de_json(json)])
+
+    # bot.remove_webhook()
+    #
+    # # Ставим заново вебхук
+    # bot.set_webhook(url=WEBHOOK_URL_BASE + WEBHOOK_URL_PATH,
+    #                 certificate=open(WEBHOOK_SSL_CERT, 'r'))
+    # # bot.polling(none_stop=True)
+    # app.run(host=WEBHOOK_HOST, ssl_context=context)
