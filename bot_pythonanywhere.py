@@ -25,7 +25,7 @@ context.use_certificate_file(WEBHOOK_SSL_CERT)
 app = Flask(__name__)
 
 
-@app.route('/{}'.format(config.token))
+@app.route('/{}'.format(config.token), methods=['POST'])
 def index():
     print('New connection')
     update = request.json
