@@ -5,37 +5,12 @@ from telebot import types
 from random import randint
 import json
 import pickledb
-from flask import Flask, request, abort
 
 
-bot = telebot.TeleBot(config.token)
+bot = telebot.TeleBot(config.token, threaded=config.bot_threaded)
 groups_storage = pickledb.load('groups_storage.db', False)
-
-
-WEBHOOK_HOST = '0.0.0.0'
-WEBHOOK_PORT = 8443  # 443, 80, 88 или 8443 (порт должен быть открыт!)
-WEBHOOK_LISTEN = '0.0.0.0'  # На некоторых серверах придется указывать такой же IP, что и выше
-
-WEBHOOK_SSL_CERT = './nsuSchTelBot_cert.pem'  # Путь к сертификату
-WEBHOOK_SSL_PRIV = './nsuSchTelBot_pkey.pem'  # Путь к приватному ключу
-
-WEBHOOK_URL_BASE = "https://%s:%s" % ('MilQ.pythonanywhere.com', WEBHOOK_PORT)
-WEBHOOK_URL_PATH = "/%s/" % (config.token)
-#
-# context = SSL.Context(SSL.SSLv23_METHOD)
-# context.use_privatekey_file(WEBHOOK_SSL_PRIV)
-# context.use_certificate_file(WEBHOOK_SSL_CERT)
-
-app = Flask(__name__)
-
-@app.route('/')
-def index():
-    update = request.json
-    if update:
-        bot.process_new_updates([update])
-        return 'Ok'
-    else:
-        abort(403)
+with open('sch.txt', 'r') as inp:
+    sch = json.load(inp)
 
 
 def is_command(text):
@@ -298,18 +273,5 @@ def dialog_mysch(message):
 def repeat_all_messages(message):
     send_sch_error_message(message.chat.id)
 
-if __name__ == '__main__':
-    with open('sch.txt', 'r') as inp:
-        sch = json.load(inp)
-
-    jsn = json.loads('{"message": {"entities": [{"type": "bot_command", "offset": 0, "length": 6}], "date": 1491019666, "from": {"id": 249750777, "last_name": "Nikolenko", "first_name": "Nikita"}, "chat": {"type": "private", "id": 249750777, "last_name": "Nikolenko", "first_name": "Nikita"}, "text": "/mysch", "message_id": 413}, "update_id": 624382611}')
-
-    bot.process_new_updates([telebot.types.Update.de_json(jsn)])
-
-    # bot.remove_webhook()
-    #
-    # # Ставим заново вебхук
-    # bot.set_webhook(url=WEBHOOK_URL_BASE + WEBHOOK_URL_PATH,
-    #                 certificate=open(WEBHOOK_SSL_CERT, 'r'))
-    # # bot.polling(none_stop=True)
-    # app.run(host=WEBHOOK_HOST, ssl_context=context)
+# if __name__ == '__main__':
+    # bot.polling(none_stop=True)
