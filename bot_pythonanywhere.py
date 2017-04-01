@@ -6,33 +6,22 @@ from random import randint
 import json
 import pickledb
 from flask import Flask, request, abort
-from OpenSSL import SSL
-
+import logging
 
 bot = telebot.TeleBot(config.token, threaded=False)
-logger = telebot.logger.setLevel('DEBUG')
+logger = telebot.logger.setLevel(logging.WARN)
 groups_storage = pickledb.load('groups_storage.db', False)
 
-WEBHOOK_SSL_CERT = './nsuSchTelBot_cert.pem'  # Путь к сертификату
-WEBHOOK_SSL_PRIV = './nsuSchTelBot_pkey.pem'  # Путь к приватному ключу
-
-WEBHOOK_URL = "https://MilQ.pythonanywhere.com/{}".format(config.token)
-
-context = SSL.Context(SSL.SSLv23_METHOD)
-context.use_privatekey_file(WEBHOOK_SSL_PRIV)
-context.use_certificate_file(WEBHOOK_SSL_CERT)
+WEBHOOK_URL = "https://MilQ.pythonanywhere.com/{}".format(config.webhook_guid)
 
 app = Flask(__name__)
 
 
-@app.route('/{}'.format(config.token), methods=['POST'])
+@app.route('/{}'.format(config.webhook_guid), methods=['POST'])
 def index():
-    print('New connection')
     update = request.json
     if update:
-        print(json.dumps(update), type(update))
         bot.process_new_updates([telebot.types.Update.de_json(update)])
-        print('After process')
         return '', 200
     else:
         abort(403)
@@ -299,19 +288,6 @@ def dialog_mysch(message):
 def repeat_all_messages(message):
     send_sch_error_message(message.chat.id)
 
-# if __name__ == '__main__':
-#     with open('sch.txt', 'r') as inp:
-#         sch = json.load(inp)
-#
-#     bot.remove_webhook()
-#
-#     # Ставим заново вебхук
-#     bot.set_webhook(url=WEBHOOK_URL,
-#                     certificate=open(WEBHOOK_SSL_CERT, 'r'))
-#
-#     print('Webhook set, everything is ready.')
-#     # bot.polling(none_stop=True)
-#     # app.run(host=WEBHOOK_HOST, ssl_context=context)
 
 with open('sch.txt', 'r') as inp:
     sch = json.load(inp)
@@ -320,6 +296,3 @@ bot.remove_webhook()
 
 # Ставим заново вебхук
 bot.set_webhook(url=WEBHOOK_URL)
-                # certificate=open(WEBHOOK_SSL_CERT, 'r'))
-
-print('Not inside main, woohoo')
